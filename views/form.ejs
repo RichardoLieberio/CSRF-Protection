@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- We can incluse csrf token in meta tag -->
+    <meta name="x-custom-csrf-token" content="<%= csrfToken %>">
+    <title>Document</title>
+</head>
+<body>
+    <form method="POST">
+        <!-- We can include csrf token in input hidden -->
+        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+        <input type="text" name="myname">
+        <input type="submit" value="Submit">
+    </form>
+</body>
+</html>
+
+<script>
+    const form = document.querySelector('form');
+    const token = document.querySelector('input[name="_csrf"]');  // Selecting token from input type hidden
+    const token_meta = document.querySelector('meta[name="x-custom-csrf-token"]');  // Selecting token from meta tag
+    const name = document.querySelector('input[name="myname"]');
+
+    form.addEventListener('submit', function(e) {
+        e.preventDefault();
+        console.log(token.value, token_meta.content);
+        fetch('/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                // CSRF Token by default is CSRF-Token but we have changed it in index.js
+                // 'x-custom-csrf-token': token.value // CSRF Token from input hidden
+                'x-custom-csrf-token': token_meta.content // CSRF Token from meta tag
+            },
+            body: JSON.stringify({name: name.value})
+        })
+        .then(function(response) {
+            return response.json();
+        })
+        .then(function(data) {
+            console.log(data);
+        })
+        .catch(function(error) {
+            console.error(`Error: ${error}`);
+        })
+    });
+</script>
